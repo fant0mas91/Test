@@ -1,0 +1,75 @@
+# Positive Scenario: Create a pet
+def create_pet(name, status, category_id, category_name):
+    endpoint = f"{BASE_URL}/pet"
+    data = {
+        "id": 0,
+        "category": {"id": category_id, "name": category_name},
+        "name": name,
+        "photoUrls": [],
+        "tags": [],
+        "status": status
+    }
+    response = requests.post(endpoint, json=data)
+    if response.status_code == 200:
+        print("Pet created successfully!")
+    else:
+        print(f"Failed to create pet! Status code: {response.status_code}")
+
+# Positive Scenario: Get pet by ID
+def get_pet_by_id(pet_id):
+    endpoint = f"{BASE_URL}/pet/{pet_id}"
+    response = requests.get(endpoint)
+    if response.status_code == 200:
+        print(f"Pet details: {response.json()}")
+    else:
+        print(f"Failed to get pet details! Status code: {response.status_code}")
+
+# Positive Scenario: Update pet details
+def update_pet(pet_id, name, status):
+    endpoint = f"{BASE_URL}/pet"
+    data = {
+        "id": pet_id,
+        "name": name,
+        "status": status
+    }
+    response = requests.put(endpoint, json=data)
+    if response.status_code == 200:
+        print("Pet details updated successfully!")
+    else:
+        print(f"Failed to update pet details! Status code: {response.status_code}")
+
+# Positive Scenario: Delete pet by ID
+def delete_pet(pet_id):
+    endpoint = f"{BASE_URL}/pet/{pet_id}"
+    response = requests.delete(endpoint)
+    if response.status_code == 200:
+        print("Pet deleted successfully!")
+    else:
+        print(f"Failed to delete pet! Status code: {response.status_code}")
+
+# Negative Scenario: Attempt to get a non-existent pet
+def get_non_existent_pet():
+    endpoint = f"{BASE_URL}/pet/9999999"  # Assuming pet with ID 9999999 doesn't exist
+    response = requests.get(endpoint)
+    if response.status_code == 404:
+        print("Pet not found (expected behavior for a non-existent pet).")
+    else:
+        print(f"Unexpected response! Status code: {response.status_code}")
+
+# Test the CRUD operations
+def test_crud_operations():
+    # Create a new pet
+    create_pet("Fluffy", "available", 1, "Cats")
+    # Get pet details by ID
+    get_pet_by_id(1)  # Assuming pet with ID 1 exists
+    # Update pet details
+    update_pet(1, "Whiskers", "sold")
+    # Get updated pet details by ID
+    get_pet_by_id(1)
+    # Delete the pet
+    delete_pet(1)
+    # Attempt to get a non-existent pet
+    get_non_existent_pet()
+
+if __name__ == "__main__":
+    test_crud_operations()
