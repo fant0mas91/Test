@@ -1,0 +1,65 @@
+import unittest
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+class InsiderTest(unittest.TestCase):
+    def setUp(self):
+        # Initialize WebDriver
+        self.driver = webdriver.Chrome()  # Change this to webdriver.Firefox() for Firefox
+        self.driver.maximize_window()
+
+    def tearDown(self):
+        if self.driver is not None:
+            self.driver.quit()
+
+    def take_screenshot(self, name):
+        if self.driver is not None:
+            self.driver.save_screenshot(f"{name}.png")
+
+    def test_insider_scenario(self):
+        # Step 1: Visit Insider home page
+        self.driver = webdriver.Chrome() if self.browser == "chrome" else webdriver.Firefox()
+        self.driver.get("https://useinsider.com/")
+        self.assertIn("Insider", self.driver.title)
+        
+        # Step 2: Navigate to Careers page
+        self.driver.find_element_by_link_text("Company").click()
+        self.driver.find_element_by_link_text("Careers").click()
+        WebDriverWait(self.driver, 10).until(EC.url_contains("/careers/"))
+        
+        # Check Careers page blocks
+        careers_page_blocks = ["Locations", "Teams", "Life at Insider"]
+        for block in careers_page_blocks:
+            self.assertTrue(self.is_element_visible((By.ID, block.lower().replace(" ", "-"))), f"{block} block is not visible")
+        
+        # Step 3: Filter QA jobs in Istanbul, Turkey
+        self.driver.get("https://useinsider.com/careers/quality-assurance/")
+        self.driver.find_element_by_link_text("See all QA jobs").click()
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "jobs-list")))
+        
+        # Step 4: Check job details
+        jobs = self.driver.find_elements_by_xpath("//div[@class='jobs-list-item']")
+        for job in jobs:
+            position = job.find_element_by_class_name("position").text
+            department = job.find_element_by_class_name("department").text
+            location = job.find_element_by_class_name("location").text
+            self.assertIn("Quality Assurance", position)
+            self.assertIn("Quality Assurance", department)
+            self.assertIn("Istanbul, Turkey", location)
+        
+        # Step 5: Click "View Role" button and check redirection
+        self.driver.find_element_by_class_name("view-role").click()
+        WebDriverWait(self.driver, 10).until(EC.url_contains("lever.co"))
+        self.assertIn("Lever", self.driver.title)
+
+    def is_element_visible(self, locator):
+        try:
+            WebDriverWait(self.driver, 3).until(EC.visibility_of_element_located(locator))
+            return True
+        except:
+            return False
+
+if __name__ == "__main__":
+    unittest.main()
